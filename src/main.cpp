@@ -9,18 +9,18 @@
 
 #include <dmx.h>
 
-int readcycle = 0;
-
 WiFiManager wifiManager;
 void checkButton();
 
 WebServer server(800);
 
-// JSON data buffer
-StaticJsonDocument<250> jsonDocument;
 char buffer[250];
 
-PwmControl pwm(0x40, 1.05 * 600); // actual frequency is 5% below this number
+#define CONTROLLER_COUNT 4
+#define CONTROLLER_FIRST_ADDRESS 0x40
+#define CONTROLLER_FREQ 600
+//* pwm controllers
+PwmControl *pwmControllers[CONTROLLER_COUNT];
 
 const uint8_t BUTTON_PIN = 0;
 
@@ -31,26 +31,33 @@ void handlePost()
     //handle error here
   }
   String body = server.arg("plain");
+  // JSON data buffer
+  StaticJsonDocument<250> jsonDocument;
   deserializeJson(jsonDocument, body);
 
+  const uint8_t channel = jsonDocument["channel"];
   // Get RGB components
   const uint8_t red = jsonDocument["red"];
   const uint8_t green = jsonDocument["green"];
   const uint8_t blue = jsonDocument["blue"];
   const uint8_t white = jsonDocument["white"];
-  pwm.SetColor(0, red, green, blue, white);
-  printf("%i, %i, %i, %i \n", red, green, blue, white);
 
-  // Respond to the client
-  server.send(200, "application/json", "{}");
+  uint8_t controllerNum = channel / 16;
+  if (controllerNum < CONTROLLER_COUNT)
+  {
+    pwmControllers[channel / 16]->SetColor(channel % 16, red, green, blue, white);
+    printf("%i, %i, %i, %i \n", red, green, blue, white);
+    // Respond to the client
+    server.send(200, "application/json", "{}");
+  }
+  else
+  {
+    server.send(500, "application/json", "{\"message\":\"Invalid channel\"}");
+  }
 }
 
 void setup_routing()
 {
-  // server.on("/temperature", getTemperature);
-  // server.on("/pressure", getPressure);
-  // server.on("/humidity", getHumidity);
-  // server.on("/env", getEnv);
   server.on("/led", HTTP_POST, handlePost);
 
   // start server
@@ -103,8 +110,13 @@ void setup()
   ArduinoOTA.begin();
 
   setup_routing();
-  pwm.begin();
-  pwm.SetColor(0, 0, 0, 0, 0);
+  // initialize PWM controllers
+  for (int i = 0; i < CONTROLLER_COUNT; i++)
+  {
+    pwmControllers[i] = new PwmControl(CONTROLLER_FIRST_ADDRESS + i, CONTROLLER_FREQ);
+    pwmControllers[i]->begin();
+  }
+
   delay(10);
 }
 
@@ -113,32 +125,8 @@ void loop()
   server.handleClient();
   checkButton();
   ArduinoOTA.handle();
-  // pwm.setPin(0, 0 * 4095);
-  // pwm.setPin(1, TEST_LEVEL * 4095);
-  // pwm.setPin(2, TEST_LEVEL * 4095);
-  // pwm.setPin(3, 0 * 4095);
-  // delay(1000 * 5);
+  delay(250);
 }
-
-// void loop1()
-// {
-//   // put your main code here, to run repeatedly:
-//   pwm.setPin(3, 0);
-//   pwm.setPin(0, TEST_LEVEL * 4095);
-//   delay(1000 * 5);
-
-//   pwm.setPin(0, 0);
-//   pwm.setPin(1, TEST_LEVEL * 4095);
-//   delay(1000 * 5);
-
-//   pwm.setPin(1, 0);
-//   pwm.setPin(2, TEST_LEVEL * 4095);
-//   delay(1000 * 5);
-
-//   pwm.setPin(2, 0);
-//   pwm.setPin(3, TEST_LEVEL * 4095);
-//   delay(1000 * 5);
-// }
 
 void checkButton()
 {
@@ -152,7 +140,7 @@ void checkButton()
   // is configuration portal requested?
   if (digitalRead(BUTTON_PIN) == LOW)
   {
-    delay(50);
+    delay(100);
     if (digitalRead(BUTTON_PIN) == LOW)
     {
       if (!portalRunning)
