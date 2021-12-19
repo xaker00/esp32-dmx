@@ -4,7 +4,7 @@
  * @brief Construct a new Pwm Control:: Pwm Control object
  * 
  * @param address defaults to 0x40 if omitted
- * @param frequency default to 150hz if omitted
+ * @param frequency default to 500Hz if omitted
  */
 PwmControl::PwmControl(uint8_t address, float frequency)
 {
