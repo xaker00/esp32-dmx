@@ -21,7 +21,7 @@ private:
     uint16_t frequency;
 
 public:
-    PwmControl(uint8_t address = 0x40, float frequency = 150.0);
+    PwmControl(uint8_t address = 0x40, float frequency = 500.0);
     ~PwmControl();
     void begin();
     void SetColor(uint8_t channel, uint8_t red, uint8_t green, uint8_t blue, uint8_t white);
