@@ -123,9 +123,9 @@ void setup()
 void loop()
 {
   server.handleClient();
-  checkButton();
+  // checkButton();
   ArduinoOTA.handle();
-  delay(250);
+  // delay(250);
 }
 
 void checkButton()
