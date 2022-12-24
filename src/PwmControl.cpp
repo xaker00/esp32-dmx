@@ -99,12 +99,12 @@ void PwmControl::SetColor(uint8_t channel, uint8_t red, uint8_t green, uint8_t b
         if (counter + channels[i]->value > 4095)
             counter = 0;
         pwm->setPWM(channel + channels[i]->channel, counter, counter + channels[i]->value);
-        printf("Channel %i, value %i, start %i, stop %i\n", channel + channels[i]->channel, channels[i]->value, counter, counter + channels[i]->value);
+        // printf("Channel %i, value %i, start %i, stop %i\n", channel + channels[i]->channel, channels[i]->value, counter, counter + channels[i]->value);
         counter += channels[i]->value;
     }
     // place the last (largest) value on the right
     pwm->setPWM(channel + channels[3]->channel, 4095 - channels[3]->value, 4095);
-    printf("Channel %i, value %i, start %i, stop %i\n", channel + channels[3]->channel, channels[3]->value, 4095 - channels[3]->value, 4095);
+    // printf("Channel %i, value %i, start %i, stop %i\n", channel + channels[3]->channel, channels[3]->value, 4095 - channels[3]->value, 4095);
 }
 
 ColorData::ColorData(COLORS channel, uint16_t value)
