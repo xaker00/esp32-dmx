@@ -4,7 +4,7 @@
 
 #include "cie1931.h"
 
-#define PWM_FREQ 300 // Analog servos run at ~50 Hz updates
+#define MAX_POWER 765
 
 enum COLORS{
     RED,

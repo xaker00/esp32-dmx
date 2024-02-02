@@ -49,6 +49,17 @@ void PwmControl::begin()
 
 void PwmControl::SetColor(uint8_t channel, uint8_t red, uint8_t green, uint8_t blue, uint8_t white)
 {
+    // limit total power
+    uint16_t sum = (red + green + blue + white);
+    if(sum > MAX_POWER)
+    {
+        const float ratio = (float)MAX_POWER / (float)sum;
+        red *= ratio;
+        green *= ratio;
+        blue *= ratio;
+        white *= ratio;
+    }
+
     // convert to CIE curve levels
     const uint16_t r = cie[red];
     const uint16_t g = cie[green];
@@ -67,6 +78,7 @@ void PwmControl::SetColor(uint8_t channel, uint8_t red, uint8_t green, uint8_t b
     channels[1] = &greenChannel;
     channels[2] = &blueChannel;
     channels[3] = &whiteChannel;
+
 
     // sort channels by value
     uint8_t swaps;
