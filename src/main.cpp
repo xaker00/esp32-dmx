@@ -203,7 +203,7 @@ void taskProcessDMX(void *parameter)
         Serial.print(": fail - ");
       digitalWrite(LED_PIN, LOW);
     }
-    DMX::ReadAll(chanVal, 200, sizeof(chanVal) - 1);
+    DMX::ReadAll(chanVal, 220, sizeof(chanVal) - 1);
     for (int channel = 0; channel < sizeof(chanVal) - 1; channel += 4)
     {
       uint8_t controllerNum = channel / CHANNELS_PER_CONTROLLER;
