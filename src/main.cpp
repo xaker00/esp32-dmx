@@ -188,7 +188,7 @@ void taskProcessDMX(void *parameter)
   const uint8_t print_every = 5;
   for (;;)
   {
-    xTaskDelayUntil(&xLastWakeTime, 200 / portTICK_PERIOD_MS);
+    xTaskDelayUntil(&xLastWakeTime, 100 / portTICK_PERIOD_MS);
     if (counter % print_every == 0)
       Serial.print(millis());
     if (DMX::IsHealthy())
